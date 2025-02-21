@@ -34,7 +34,6 @@ struct LoginUseCase: LoginViewModelUseCase {
             let response = try decoder.decode(LoginResponse.self, from: data)
             let token = response.apiKey
             
-            // Save token in Keychain; throw an error if saving fails.
             guard KeychainService.shared.saveToken(token) else {
                 throw APIError.decodeFailure
             }

@@ -14,7 +14,7 @@ protocol LoginViewModelUseCase {
 }
 
 final class LoginViewModel: LoginViewControllerViewModel {
-    // MARK: - Properties
+
     var email: String = ""
     var password: String = ""
     var isGuestLogin = false
@@ -35,6 +35,9 @@ final class LoginViewModel: LoginViewControllerViewModel {
     }
     
     func login() {
+        guard isValidEmail(email) else {
+            return
+        }
         performLogin(withEmail: email, password: password)
     }
     
@@ -44,7 +47,7 @@ final class LoginViewModel: LoginViewControllerViewModel {
     }
     
     private func performLogin(withEmail email: String, password: String) {
-        guard !isLoading, email.count > 2, password.count >= 0 else {
+        guard !isLoading, email.count > 0, password.count >= 0 else {
             return
         }
         
@@ -83,5 +86,11 @@ final class LoginViewModel: LoginViewControllerViewModel {
                 }
             })
             .store(in: &cancellables)
+    }
+    
+    private func isValidEmail(_ email: String) -> Bool {
+        guard let domainPart = email.split(separator: "@").last else { return false }
+        let domain = domainPart.lowercased()
+        return domain.hasSuffix(".com") || domain.hasSuffix(".net") || domain.hasSuffix(".biz")
     }
 }

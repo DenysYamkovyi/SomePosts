@@ -8,7 +8,6 @@
 import UIKit
 import Combine
 
-// MARK: - TextFieldViewModel Protocol
 protocol TextFieldViewModel {
     var title: String { get }
     var placeholder: String { get }
@@ -24,10 +23,17 @@ struct DefaultTextFieldViewModel: TextFieldViewModel {
     var onEditAction = PassthroughSubject<Void, Never>()
 }
 
-// MARK: - TextFieldView
 class TextFieldView: UIView {
     private let titleLabel = UILabel()
     private let textField = UITextField()
+
+    private let warningImageView: UIImageView = {
+        let iv = UIImageView(image: UIImage(systemName: "exclamationmark.circle"))
+        iv.tintColor = .systemRed
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        iv.isHidden = true
+        return iv
+    }()
     
     var text: String {
         return textField.text ?? ""
@@ -47,19 +53,29 @@ class TextFieldView: UIView {
     private func setupView() {
         addSubview(titleLabel)
         addSubview(textField)
+        addSubview(warningImageView)
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         textField.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
+            // Title label at top
             titleLabel.topAnchor.constraint(equalTo: topAnchor),
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
             titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor),
             
+            // Text field below title label
             textField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
             textField.leadingAnchor.constraint(equalTo: leadingAnchor),
-            textField.trailingAnchor.constraint(equalTo: trailingAnchor),
-            textField.bottomAnchor.constraint(equalTo: bottomAnchor)
+            // Leave some space for the warning icon on the right
+            textField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -30),
+            textField.bottomAnchor.constraint(equalTo: bottomAnchor),
+            
+            // Warning icon anchored to the trailing side of the text field
+            warningImageView.centerYAnchor.constraint(equalTo: textField.centerYAnchor),
+            warningImageView.leadingAnchor.constraint(equalTo: textField.trailingAnchor, constant: 4),
+            warningImageView.widthAnchor.constraint(equalToConstant: 20),
+            warningImageView.heightAnchor.constraint(equalToConstant: 20)
         ])
         
         textField.keyboardType = .emailAddress
@@ -74,6 +90,18 @@ class TextFieldView: UIView {
     
     @objc private func editingChanged() {
         currentViewModel?.onEditAction.send(())
+        if let viewModel = currentViewModel, viewModel.title.lowercased() == "email" {
+            let isValid = validateEmail(textField.text ?? "")
+            warningImageView.isHidden = isValid
+        }
+    }
+    
+    private func validateEmail(_ email: String) -> Bool {
+        guard let domainPart = email.split(separator: "@").last else {
+            return false
+        }
+        let domain = domainPart.lowercased()
+        return domain.hasSuffix(".com") || domain.hasSuffix(".net") || domain.hasSuffix(".biz")
     }
 }
 
@@ -83,5 +111,9 @@ extension TextFieldView: Configurable {
         currentViewModel = viewModel
         titleLabel.text = viewModel.title
         textField.placeholder = viewModel.placeholder
+        
+        if viewModel.title.lowercased() == "email" {
+            warningImageView.isHidden = true
+        }
     }
 }

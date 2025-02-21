@@ -16,10 +16,10 @@ protocol ButtonViewModel {
 
 struct DefaultButtonViewModel: ButtonViewModel {
     var title: String
+    
     var onButtonAction = PassthroughSubject<Void, Never>()
 }
 
-// MARK: - ButtonView
 class ButtonView: UIView {
     private let button = UIButton(type: .system)
     
