@@ -28,27 +28,11 @@ Cons
     - Increased boilerplate code
     - Potential for added complexity in smaller projects
 
-Key Features
-
-Login Screen
-
-    - Biometric Authentication: Integration for fingerprint/face recognition.
-    - Login Button Availability: Enabled based on valid input for email and password
-    Token Management:
-    - Saving the token in the Keychain/ for more security invetigate using the Secure Enclave for cryptographic operations
-    - Refreshing tokens when needed
-
-Posts screen
-    - Cell Resizing: Ensure dynamic cells resize correctly.
-
 Coordinator Pattern
 
     - Checks login status and navigates appropriately.
     - Modular navigation flows (e.g., transitioning from the login screen to the posts list)
 
-Handling Errors
-
-Internet status checking
 
 Localization & Accessibility
 
@@ -64,8 +48,17 @@ Testing
     - Frameworks: Future improvements might include using SwiftSnapshot, SwiftNimble, and SwiftQuick for more expressive tests.
 
 
-
 Future Improvements
+    Login Screen:
+    - Biometric Authentication: Integration for fingerprint/face recognition.
+    - Login Button Availability: Enabled based on valid input for email and password
+    
+    Token Management:
+    - Saving the token in the Keychain/ for more security invetigate using the Secure Enclave for cryptographic operations
+    - Refreshing tokens when needed
+
+    Posts screen:
+    - Cell Resizing: Ensure dynamic cells resize correctly.
 
     Documentation:
     - Expand project documentation with detailed API and architectural explanations.
@@ -92,4 +85,10 @@ Future Improvements
     Accessibility:
     - Improve accessibility adaptations.
     - Consider a black and white theme for better accessibility support.
+    
+    Handling Errors
+
+    Internet status checking
+    
+    Update status checking
 
