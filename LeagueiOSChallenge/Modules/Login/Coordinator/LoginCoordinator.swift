@@ -13,6 +13,8 @@ final class LoginCoordinator: Coordinator {
     
     private weak var navigationController: UINavigationController?
     
+    let didFinishLogin = PassthroughSubject<Void, Never>()
+    
     private var cancellables: Set<AnyCancellable> = []
     
     public init(navigationController: UINavigationController) {
@@ -22,25 +24,19 @@ final class LoginCoordinator: Coordinator {
     @discardableResult
     func start(animated: Bool) -> CompletionPublisher {
         let apiService = API(urlSession: .init(configuration: .default))
-        let viewModel = LoginViewModel(apiService: apiService)
+        let loginUseCase = LoginUseCase(apiService: apiService)
+        let viewModel = LoginViewModel(loginViewModelUseCase: loginUseCase)
         let viewController = LoginViewController(viewModel: viewModel)
         
         viewModel.showPosts
-            .sink { [weak self] movie in
-                self?.showPosts()
+            .sink { [weak self] in
+                self?.didFinishLogin.send()
             }
             .store(in: &cancellables)
         
         navigationController?.pushViewController(viewController, animated: animated)
         
         return .never()
-    }
-    
-    private func showPosts() {
-//        let viewModel = PostsListViewModel()
-//        let viewController = PostsListViewController(viewModel: viewModel)
-//
-//        navigationController?.pushViewController(viewController, animated: true)
     }
 }
 

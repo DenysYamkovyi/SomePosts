@@ -11,18 +11,17 @@ import UIKit
 protocol LoginViewControllerViewModel: ObservableObject {
     var email: String { get set }
     var password: String { get set }
-    var loginText: String { get }
-    var guestText: String { get }
     var isLoading: Bool { get }
     
     var error: PassthroughSubject<Error, Never> { get }
     
-    func fetchUserToken() -> AnyPublisher<Void, Error>
-    func guestLogin() -> AnyPublisher<Void, Error>
+    func login()
+    func guestLogin()
 }
 
 final class LoginViewController<ViewModel>: BaseViewController where ViewModel: LoginViewControllerViewModel {
     private let viewModel: ViewModel
+    private var activityIndicatorView: UIActivityIndicatorView?
 
     let emailFieldView = TextFieldView()
     let passwordFieldView = TextFieldView()
@@ -111,6 +110,25 @@ final class LoginViewController<ViewModel>: BaseViewController where ViewModel: 
     
     private func updateView() {
         view.isUserInteractionEnabled = !viewModel.isLoading
+        updateActivityIndicator()
+    }
+    
+    private func updateActivityIndicator() {
+        if viewModel.isLoading,
+           activityIndicatorView == nil {
+            let activity = UIActivityIndicatorView(style: .large)
+            activity.translatesAutoresizingMaskIntoConstraints = false
+            activity.startAnimating()
+            view.addSubview(activity)
+            
+            activity.bindToCenter()
+            
+            activityIndicatorView = activity
+        } else if activityIndicatorView != nil {
+            activityIndicatorView?.stopAnimating()
+            activityIndicatorView?.removeFromSuperview()
+            activityIndicatorView = nil
+        }
     }
     
     private func handleError(_ error: Error) {
@@ -130,26 +148,10 @@ final class LoginViewController<ViewModel>: BaseViewController where ViewModel: 
         viewModel.email = emailFieldView.text
         viewModel.password = passwordFieldView.text
         
-        viewModel.fetchUserToken()
-            .sink(receiveCompletion: { [weak self] completion in
-                if case let .failure(error) = completion {
-                    self?.viewModel.error.send(error)
-                }
-            }, receiveValue: {
-                print("User token fetched successfully")
-            })
-            .store(in: &cancellables)
+        viewModel.login()
     }
     
     private func handleGuestLogin() {
         viewModel.guestLogin()
-            .sink(receiveCompletion: { [weak self] completion in
-                if case let .failure(error) = completion {
-                    self?.viewModel.error.send(error)
-                }
-            }, receiveValue: {
-                print("Guest login succeeded")
-            })
-            .store(in: &cancellables)
     }
 }
