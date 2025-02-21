@@ -30,12 +30,10 @@ final class LoginViewModel: LoginViewControllerViewModel {
     
     private var cancellables: Set<AnyCancellable> = []
     
-    // MARK: - Initializer
     init(loginViewModelUseCase: LoginViewModelUseCase) {
         self.loginViewModelUseCase = loginViewModelUseCase
     }
     
-    // MARK: - Public Methods
     func login() {
         performLogin(withEmail: email, password: password)
     }
@@ -45,7 +43,6 @@ final class LoginViewModel: LoginViewControllerViewModel {
         performLogin(withEmail: "guest@email.com", password: "")
     }
     
-    // MARK: - Private Method
     private func performLogin(withEmail email: String, password: String) {
         guard !isLoading, email.count > 2, password.count >= 0 else {
             return

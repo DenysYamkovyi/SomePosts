@@ -67,7 +67,6 @@ final class LoginViewController<ViewModel>: BaseViewController where ViewModel: 
             stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
         ])
         
-        // Configure custom views
         let emailVM = DefaultTextFieldViewModel(title: "Email", placeholder: "Enter your email", validator: "")
         let passwordVM = DefaultTextFieldViewModel(title: "Password", placeholder: "Enter your password", validator: "")
         let loginVM = DefaultButtonViewModel(title: "Login")
@@ -78,7 +77,6 @@ final class LoginViewController<ViewModel>: BaseViewController where ViewModel: 
         loginButtonView.configure(with: loginVM)
         guestButtonView.configure(with: guestVM)
         
-        // Bind button actions to controller logic
         loginVM.onButtonAction
             .sink { [weak self] in self?.handleLogin() }
             .store(in: &cancellables)
@@ -141,8 +139,6 @@ final class LoginViewController<ViewModel>: BaseViewController where ViewModel: 
         alertViewController.addAction(okAction)
         present(alertViewController, animated: true)
     }
-    
-    // MARK: - Button Handlers
     
     private func handleLogin() {
         viewModel.email = emailFieldView.text

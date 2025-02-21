@@ -16,7 +16,6 @@ struct PostsListUseCase: PostsListViewModelUseCase {
     }
     
     func fetchPosts(userId: String) -> AnyPublisher<[PostModel], Error> {
-        // Optionally, you can pass the userId as a query parameter:
         let queryParams = ["userId": userId]
         
         return apiService.request(
@@ -29,11 +28,10 @@ struct PostsListUseCase: PostsListViewModelUseCase {
         .tryMap { data -> [PostResponse] in
             let decoder = JSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase
-            // Decode an array of posts
+
             return try decoder.decode([PostResponse].self, from: data)
         }
         .map { postResponses in
-            // Load user from keychain. Adjust behavior if no user is found.
             if let user = KeychainService.shared.loadUser() {
                 return postResponses.map { post in
                     PostModel(title: post.title, body: post.body, user: user)

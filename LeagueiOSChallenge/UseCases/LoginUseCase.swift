@@ -57,29 +57,20 @@ struct LoginUseCase: LoginViewModelUseCase {
             headers: nil
         )
         .tryMap { data -> Bool in
-            // Print JSON string for debugging
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("JSON String: \(jsonString)")
-            } else {
-                print("Failed to convert data to a string")
-            }
-            
+
             let decoder = JSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase
-            // Decode an array of users because the JSON is an array.
+ 
             let response = try decoder.decode([UserResponse].self, from: data)
             
-            // Use the first user (or adjust as needed)
             guard let user = response.first else {
                 throw APIError.decodeFailure
             }
             
-            // Save the user in Keychain; throw an error if saving fails.
             guard KeychainService.shared.saveUser(user) else {
                 throw APIError.decodeFailure
             }
             
-            // Return true to indicate a successful user fetch.
             return true
         }
         .receive(on: DispatchQueue.main)
