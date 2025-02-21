@@ -18,26 +18,40 @@ protocol Coordinator {
 final class AppCoordinator: Coordinator {
     typealias CompletionType = Void
     
-    private let window : UIWindow
+    private let window: UIWindow
     private var childCoordinators: [any Coordinator] = []
+    private var cancellables: Set<AnyCancellable> = []
     
     init(window: UIWindow) {
         self.window = window
     }
     
     @discardableResult
-    func start(animated: Bool) -> CompletionPublisher {
-        let rootViewController = UINavigationController()
-        
-        window.rootViewController = rootViewController
+    func start(animated: Bool) -> AnyPublisher<Void, Never> {
+        let rootNavigationController = UINavigationController()
+        window.rootViewController = rootNavigationController
         window.makeKeyAndVisible()
         
-        let coordinator = LoginCoordinator(navigationController: rootViewController)
-        coordinator.start(animated: false)
+        let loginCoordinator = LoginCoordinator(navigationController: rootNavigationController)
+        childCoordinators.append(loginCoordinator)
         
-        childCoordinators.append(coordinator)
+        loginCoordinator.start(animated: false)
+        
+        loginCoordinator.didFinishLogin
+            .sink { [weak self] in
+                guard let self = self else { return }
+                self.startPostsCoordinator(on: rootNavigationController)
+            }
+            .store(in: &cancellables)
         
         return .never()
     }
+    
+    private func startPostsCoordinator(on navigationController: UINavigationController) {
+        let postsCoordinator = PostsListCoordinator(navigationController: navigationController)
+        childCoordinators.append(postsCoordinator)
+        postsCoordinator.start(animated: true)
+            .sink { _ in }
+            .store(in: &cancellables)
+    }
 }
-
